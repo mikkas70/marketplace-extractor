@@ -1,5 +1,4 @@
 import * as fs from "fs";
-const sharp = require('sharp');
 import { getRegion, encode } from 'screenshot-native';
 import libnut from '@nut-tree/libnut';
 import Jimp from "jimp";

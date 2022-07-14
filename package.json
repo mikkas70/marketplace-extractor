@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "ts-node main.ts"
+    "start": "ts-node main.ts",
+    "start:sandbox": "SANDBOX_MODE=true ts-node main.ts"
   },
   "type": "commonjs",
   "devDependencies": {
@@ -11,13 +12,12 @@
   "dependencies": {
     "@nut-tree/libnut": "^2.1.8",
     "dotenv": "^16.0.1",
-    "image-clipper": "^0.4.4",
     "jimp": "^0.16.1",
     "replace-color": "^2.3.0",
+    "rimraf": "^3.0.2",
     "robotjs": "^0.6.0",
     "screenshot-desktop": "^1.12.7",
     "screenshot-native": "^1.0.4",
-    "sharp": "^0.30.7",
-    "tesseract.js": "^2.1.5"
+    "textract": "^2.5.0"
   }
 }

@@ -1,15 +1,14 @@
 import {execSync} from "child_process";
-import { keyTap } from "robotjs";
 import delay from "../helpers/delay";
 import write from "../helpers/HumanWrite";
-import {dragMouse, mouseClick} from "@nut-tree/libnut";
+import {dragMouse, mouseClick, keyTap} from "@nut-tree/libnut";
 
 export default class Tibia {
     private static instance: Tibia;
 
-    public world: string;
     public hasStarted: boolean = false;
     public isLoggedIn: boolean = false;
+    public world: string;
 
     constructor() {
         try {
@@ -32,6 +31,7 @@ export default class Tibia {
      * Login to Tibia character
      * @param username
      * @param password
+     * @param world
      */
     public async login(username, password, world) {
         await write(username);
@@ -47,8 +47,10 @@ export default class Tibia {
         this.world = world;
     }
 
-    public logout() {
+    public async logout() {
         keyTap('l', 'command');
+        await delay(2000);
+        await this.closeCharacterSelection();
         this.isLoggedIn = false;
         this.world = null;
     }
@@ -70,5 +72,30 @@ export default class Tibia {
         dragMouse(Number(process.env.MARKET_COORDINATES_X), Number(process.env.MARKET_COORDINATES_Y));
         mouseClick();
     };
+
+
+    /**
+     * Closes market
+     * @return void
+     */
+    closeMarket = async () => {
+        keyTap('escape');
+    }
+
+    /**
+     * Close character selection screen
+     * @return void
+     */
+    public closeCharacterSelection = async () => {
+        keyTap('escape');
+    }
+
+    /**
+     * Get world based on current mode.
+     * @return string
+     */
+    public getWorld = (): string => {
+        return process.env.SANDBOX_MODE === 'true' ? 'thyria' : this.world;
+    }
 }
 
