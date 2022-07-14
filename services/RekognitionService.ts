@@ -1,15 +1,17 @@
 import {Rekognition} from "aws-sdk";
 import * as fs from "fs";
 
-class RekognitionService {
+export default class RekognitionService {
     private static instance: RekognitionService;
     private rekognition: Rekognition;
 
     constructor() {
-       this.rekognition = new Rekognition();
+       this.rekognition = new Rekognition({
+           region: 'eu-west-1'
+       });
     }
 
-    public getInstance() {
+    public static getInstance() {
         if (!RekognitionService.instance) {
             RekognitionService.instance = new RekognitionService();
         }
@@ -23,6 +25,7 @@ class RekognitionService {
                 Bytes: fs.readFileSync(imagePath)
             }
         }, (err, data) => {
+            console.log(err);
             console.log(data);
         });
     }
