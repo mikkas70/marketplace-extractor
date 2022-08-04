@@ -4,15 +4,14 @@ import {IMarketStructure} from "../interfaces/marketStructure";
 import CHARACTERS from "../constants/characters";
 import Tibia from "../models/Tibia";
 import textract from 'textract';
+import APIService from "../services/APIService";
 
 const sandbox = async () => {
-    await delay(3000);
+    const service = new APIService();
 
-    textract.fromFileWithPath('images/thyria/__BUY__/Soulbleeder.png', (error, text) => {
-        console.log(error);
-        console.log(text);
+    service.getMarketableItems().then((items) => {
+        console.log(items);
     });
-    const b = 1;
 };
 
 export {

@@ -1,7 +1,6 @@
 import {dragMouse, mouseClick, keyTap} from "@nut-tree/libnut";
 import {getCroppedImage} from "../helpers/screenshot";
 import delay from "../helpers/delay";
-import ITEMS from "../constants/items";
 import humanWrite from "../helpers/humanWrite";
 import Tibia from "./Tibia";
 import * as fs from "fs";
@@ -15,7 +14,7 @@ import APIService from "../services/APIService";
 
 export default class Market {
     private timestamp: number;
-    private currentItem: string;
+    private currentItemIndex: number = 0;
     private hasFinishedParsing = false;
     private offersPerItem: number = Number(process.env.MARKET_OFFERS_PER_ITEM);
     private offerPriceHeight: number = Number(process.env.MARKET_OFFER_PRICE_HEIGHT);
@@ -37,19 +36,22 @@ export default class Market {
      * @return void
      */
     startExtraction = async () => {
-        await this.API.getMarketableItems().then(async items => {
-            for (const itemName of ITEMS) {
-                this.currentItem = itemName;
+        const start = performance.now();
+        const items = Tibia.getInstance().getItems();
 
-                await this.searchItem(itemName);
-                await this.selectSearchedItem();
+        for (const itemName of items) {
+            const index = items.indexOf(itemName);
 
-                this.getSellOffersImage();
-                this.getBuyOffersImage();
+            await this.searchItem(itemName);
+            await this.selectSearchedItem();
 
-                await this.clearSearch();
-            }
-        })
+            this.getSellOffersImage(index);
+            this.getBuyOffersImage(index);
+
+            await this.clearSearch();
+        }
+
+        console.log('Finished processing ' + Tibia.getInstance().items.length + ' items in ' + ((performance.now() - start) / 1000) + ' seconds');
     }
 
     /**
@@ -58,18 +60,31 @@ export default class Market {
      */
     parseMarketData = async (): Promise<IMarketStructure> => {
         const world = Tibia.getInstance().getWorld();
+        const items = Tibia.getInstance().getItems();
         const data: IMarketStructure = {
             offers: [],
         };
 
-        for (const [index, itemName] of ITEMS.entries()) {
-            if (!fs.existsSync('images/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + itemName + '.png') ||
-                !fs.existsSync('images/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + itemName + '.png')) {
+        for (const itemName of items.values()) {
+            const itemIndex = items.indexOf(itemName);
+
+            if (!fs.existsSync('images/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + itemIndex + '.png') ||
+                !fs.existsSync('images/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + itemIndex + '.png')) {
                 continue;
             }
 
-            textract.fromFileWithPath('images/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + itemName + '.png', async (error, buyingResult) => {
-                textract.fromFileWithPath('images/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + itemName + '.png', (error, sellingResult) => {
+            textract.fromFileWithPath('images/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + itemIndex + '.png', async (buyingResultError, buyingResult) => {
+                textract.fromFileWithPath('images/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + itemIndex + '.png', (sellingResultError, sellingResult) => {
+                    if (buyingResultError) {
+                        // TODO improve logs
+                        console.log(buyingResultError);
+                    }
+
+                    if (sellingResultError) {
+                        // TODO improve logs
+                        console.log(sellingResultError);
+                    }
+
                     const buying = buyingResult.split(' ');
                     const selling = sellingResult.split(' ');
 
@@ -82,7 +97,7 @@ export default class Market {
                         sellOffers: sellOffers
                     });
 
-                    if (index + 1 === ITEMS.length) {
+                    if (itemIndex + 1 === items.length) {
                         this.hasFinishedParsing = true;
                     }
                 });
@@ -136,9 +151,9 @@ export default class Market {
      */
     private searchItem = async (itemName: string) => {
         dragMouse(Number(process.env.MARKET_SEARCH_COORDINATES_X), Number(process.env.MARKET_SEARCH_COORDINATES_Y));
-        await delay(100);
+        await delay(50);
         mouseClick();
-        await delay(100);
+        await delay(50);
         await humanWrite(itemName);
     }
 
@@ -148,9 +163,9 @@ export default class Market {
      */
     private clearSearch = async () => {
         dragMouse(Number(process.env.MARKET_CLEAR_SEARCH_COORDINATES_X), Number(process.env.MARKET_CLEAR_SEARCH_COORDINATES_Y));
-        await delay(250);
+        await delay(50);
         mouseClick();
-        await delay(250);
+        await delay(50);
     }
 
     /**
@@ -159,14 +174,14 @@ export default class Market {
      */
     private selectSearchedItem = async () => {
         dragMouse(Number(process.env.MARKET_ITEM_POSITION_1_COORDINATES_X), Number(process.env.MARKET_ITEM_POSITION_1_COORDINATES_Y));
-        await delay(250);
+        await delay(50);
         mouseClick();
-        await delay(1000);
+        await delay(175);
     }
 
-    private getSellOffersImage = () => {
+    private getSellOffersImage = (index: number) => {
         getCroppedImage(
-            'images/' + Tibia.getInstance().getWorld() + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + this.currentItem + '.png',
+            'images/' + Tibia.getInstance().getWorld() + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + index + '.png',
             Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_X),
             Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_Y),
             Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_X) + this.offerPriceWidth,
@@ -174,9 +189,9 @@ export default class Market {
         )
     }
 
-    private getBuyOffersImage = () => {
+    private getBuyOffersImage = (index: number) => {
         getCroppedImage(
-            'images/' + Tibia.getInstance().getWorld() + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + this.currentItem + '.png',
+            'images/' + Tibia.getInstance().getWorld() + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + index + '.png',
             Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_X),
             Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_Y),
             Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_X) + this.offerPriceWidth,

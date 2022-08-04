@@ -16,9 +16,18 @@ robot.setKeyboardDelay(100);
 const logic = async () => {
     const API = new APIService();
 
+    let items: string[] = [];
+
+    await API.getMarketableItems().then((itemsResponse) => {
+        items = itemsResponse;
+    });
+
+
     for await (const character of CHARACTERS) {
         // Initialize Tibia client
         const instance = await Tibia.getInstance();
+        instance.setItems(items);
+
         await delay(5000);
 
         // Login character
@@ -52,8 +61,6 @@ const logic = async () => {
 
         await instance.logout();
     }
-
-
 }
 
 if (process.env.SANDBOX_MODE === 'true') {

@@ -9,6 +9,7 @@ export default class Tibia {
     public hasStarted: boolean = false;
     public isLoggedIn: boolean = false;
     public world: string;
+    public items: string[] = [];
 
     constructor() {
         try {
@@ -96,6 +97,23 @@ export default class Tibia {
      */
     public getWorld = (): string => {
         return process.env.SANDBOX_MODE === 'true' ? 'thyria' : this.world;
+    }
+
+    /**
+     * Set items for this tibia instance
+     * @param items
+     * @return void
+     */
+    public setItems = (items: string[]): void => {
+        this.items = items;
+    }
+
+    /**
+     * Get items for this tibia instance
+     * @return string[]
+     */
+    public getItems = (): string[] => {
+        return this.items;
     }
 }
 

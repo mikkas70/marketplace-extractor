@@ -5,7 +5,7 @@ import {typeString} from "robotjs";
 const write = async (phrase: string) => {
     for (var i = 0; i < phrase.length; i++) {
         typeString(phrase.charAt(i));
-        await delay(generateRandomInteger(10, 80));
+        await delay(generateRandomInteger(10, 20));
     }
 }
 
