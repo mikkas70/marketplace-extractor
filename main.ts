@@ -51,9 +51,9 @@ const logic = async () => {
 
         await market.parseMarketData().then(data => {
             market.saveMarketData(data).then(() => {
-                API.sendData(data).then(() => {
+                API.sendData(instance.getWorld(), data).then((sentSuccessfully) => {
                     console.log('Information sent successfully.');
-                }).catch(() => {
+                }).catch(err => {
                     console.log('Something went wrong sending information to the server');
                 });
             });

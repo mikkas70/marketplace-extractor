@@ -5,12 +5,21 @@ import CHARACTERS from "../constants/characters";
 import Tibia from "../models/Tibia";
 import textract from 'textract';
 import APIService from "../services/APIService";
+import fs from "fs";
 
 const sandbox = async () => {
-    const service = new APIService();
+    const API = new APIService();
+    const text = JSON.parse(fs.readFileSync('market_offers/thyria/1659646839701.json', 'utf-8'));
 
-    service.getMarketableItems().then((items) => {
-        console.log(items);
+    API.sendData('thyria', text).then((sentSuccessfully) => {
+        if (sentSuccessfully) {
+            console.log('Information sent successfully.');
+        } else {
+            console.log('Something went wrong sending information to the server');
+        }
+    }).catch(err => {
+        console.log(err);
+        console.log('Something went wrong sending information to the server');
     });
 };
 

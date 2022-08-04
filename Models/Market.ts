@@ -11,9 +11,10 @@ import {ensureDirectoryExists} from "../helpers/filesystem";
 import FOLDERS from "../constants/folders";
 import textract from 'textract';
 import APIService from "../services/APIService";
+import moment from "moment";
 
 export default class Market {
-    private timestamp: number;
+    private timestamp: moment.Moment;
     private currentItemIndex: number = 0;
     private hasFinishedParsing = false;
     private offersPerItem: number = Number(process.env.MARKET_OFFERS_PER_ITEM);
@@ -24,7 +25,7 @@ export default class Market {
     constructor() {
         const world = Tibia.getInstance().getWorld();
 
-        this.timestamp = Date.now();
+        this.timestamp = moment();
 
         ensureDirectoryExists(process.env.IMAGES_FOLDER + '/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING);
         ensureDirectoryExists(process.env.IMAGES_FOLDER + '/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING);
@@ -62,6 +63,7 @@ export default class Market {
         const world = Tibia.getInstance().getWorld();
         const items = Tibia.getInstance().getItems();
         const data: IMarketStructure = {
+            date: this.timestamp.format('D-M-YYYY'),
             offers: [],
         };
 
@@ -108,6 +110,8 @@ export default class Market {
             await delay(200);
         }
 
+        this.cleanup();
+
         return Promise.resolve(data);
     }
 
@@ -136,7 +140,9 @@ export default class Market {
         const world = Tibia.getInstance().getWorld();
 
         rmdir(process.env.IMAGES_FOLDER + '/' + world, err => {
-            console.log('Something went wrong while trying to delete the images folder.');
+            if (err) {
+                console.log('Something went wrong deleting the images folder during cleanup.');
+            }
         });
     }
 

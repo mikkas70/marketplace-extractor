@@ -2,14 +2,20 @@ import axios, {AxiosInstance, AxiosStatic} from "axios";
 import {IMarketStructure} from "../interfaces/marketStructure";
 
 export default class APIService {
-    private axios: AxiosInstance;
+    private cloudfront: AxiosInstance;
+    private api: AxiosInstance;
 
     constructor() {
-        this.axios = axios.create({
+        this.cloudfront = axios.create({
             baseURL: process.env.CLOUDFRONT_URL
         });
 
-        this.axios.interceptors.response.use(
+        this.api = axios.create({
+            baseURL: process.env.API_URL
+        });
+
+        // TODO - Add max-ttl cache headers
+        this.cloudfront.interceptors.response.use(
             response => response,
             error => {
                 console.log('Something went wrong in this request');
@@ -21,17 +27,20 @@ export default class APIService {
      * @return Promise<string[]>
      */
     getMarketableItems = (): Promise<string[]> => {
-        return this.axios.get('items.json').then((response) => {
-            return Promise.resolve(response.data);
+        return this.cloudfront.get('items.json').then((response) => {
+            //return Promise.resolve(response.data);
+            return Promise.resolve(['Annihilation Bear']);
         });
     };
 
     /**
      * Send data information to the server.
+     * @param world
      * @param data
      */
-    sendData = (data: IMarketStructure): Promise<boolean> => {
-        console.log('Sending data');
-        return Promise.resolve(true);
+    sendData = (world: string, data: IMarketStructure): Promise<boolean> => {
+        return this.api.post('/offers/store/' + world, {data: Buffer.from(JSON.stringify(data)).toString('base64')}).then(response => {
+            return Promise.resolve(response.status !== 200);
+        });
     };
 }

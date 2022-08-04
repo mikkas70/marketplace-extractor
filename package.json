@@ -14,6 +14,7 @@
     "axios": "^0.27.2",
     "dotenv": "^16.0.1",
     "jimp": "^0.16.1",
+    "moment": "^2.29.4",
     "replace-color": "^2.3.0",
     "rimraf": "^3.0.2",
     "robotjs": "^0.6.0",
