@@ -27,8 +27,12 @@ export default class Market {
 
         this.timestamp = moment();
 
-        ensureDirectoryExists(process.env.IMAGES_FOLDER + '/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING);
-        ensureDirectoryExists(process.env.IMAGES_FOLDER + '/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING);
+        ensureDirectoryExists(process.env.IMAGES_FOLDER + '/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + FOLDERS.MARKET_OFFER_PRICES);
+        ensureDirectoryExists(process.env.IMAGES_FOLDER + '/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + FOLDERS.MARKET_OFFER_QUANTITY);
+
+        ensureDirectoryExists(process.env.IMAGES_FOLDER + '/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + FOLDERS.MARKET_OFFER_PRICES);
+        ensureDirectoryExists(process.env.IMAGES_FOLDER + '/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + FOLDERS.MARKET_OFFER_QUANTITY);
+
         ensureDirectoryExists(process.env.MARKET_OFFERS_JSON_FOLDER + '/' + world);
     }
 
@@ -47,7 +51,10 @@ export default class Market {
             await this.selectSearchedItem();
 
             this.getSellOffersImage(index);
+            this.getSellOfferQuantities(index);
+
             this.getBuyOffersImage(index);
+            this.getBuyOfferQuantities(index);
 
             await this.clearSearch();
         }
@@ -70,38 +77,37 @@ export default class Market {
         for (const itemName of items.values()) {
             const itemIndex = items.indexOf(itemName);
 
-            if (!fs.existsSync('images/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + itemIndex + '.png') ||
-                !fs.existsSync('images/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + itemIndex + '.png')) {
+            if (!fs.existsSync('images/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + FOLDERS.MARKET_OFFER_PRICES + '/' + itemIndex + '.png') ||
+                !fs.existsSync('images/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + FOLDERS.MARKET_OFFER_PRICES + '/' + itemIndex + '.png')) {
                 continue;
             }
 
-            textract.fromFileWithPath('images/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + itemIndex + '.png', async (buyingResultError, buyingResult) => {
-                textract.fromFileWithPath('images/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + itemIndex + '.png', (sellingResultError, sellingResult) => {
-                    if (buyingResultError) {
-                        // TODO improve logs
-                        console.log(buyingResultError);
-                    }
+            textract.fromFileWithPath('images/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + FOLDERS.MARKET_OFFER_PRICES + '/' + itemIndex + '.png', (buyingPricesError, buyingPrices) => {
+                textract.fromFileWithPath('images/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + FOLDERS.MARKET_OFFER_PRICES + '/' + itemIndex + '.png', (sellingPricesError, sellingPrices) => {
+                    textract.fromFileWithPath('images/' + world + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + FOLDERS.MARKET_OFFER_QUANTITY + '/' + itemIndex + '.png', (buyingQuantitiesError, buyingQuantities) => {
+                        textract.fromFileWithPath('images/' + world + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + FOLDERS.MARKET_OFFER_QUANTITY + '/' + itemIndex + '.png', (sellingQuantitiesError, sellingQuantities) => {
+                            const buying = buyingPrices.split(' ');
+                            const buyingQuantity = buyingQuantities.split(' ').reduce((a,b) => Number(a) + Number(b), 0) || 0;
 
-                    if (sellingResultError) {
-                        // TODO improve logs
-                        console.log(sellingResultError);
-                    }
+                            const selling = sellingPrices.split(' ');
+                            const sellingQuantity = sellingQuantities.split(' ').reduce((a,b) => Number(a) + Number(b), 0) || 0;
 
-                    const buying = buyingResult.split(' ');
-                    const selling = sellingResult.split(' ');
+                            const buyOffers = buying.map((price): number | undefined => sanitizePrice(price)).filter((price) => price !== undefined);
+                            const sellOffers = selling.map((price): number | undefined => sanitizePrice(price)).filter((price) => price !== undefined);
 
-                    const buyOffers = buying.map((price): number | undefined => sanitizePrice(price)).filter((price) => price !== undefined);
-                    const sellOffers = selling.map((price): number | undefined => sanitizePrice(price)).filter((price) => price !== undefined);
+                            data.offers.push({
+                                itemName: itemName,
+                                buyQuantity: buyingQuantity,
+                                sellQuantity: sellingQuantity,
+                                buyOffers: buyOffers,
+                                sellOffers: sellOffers
+                            });
 
-                    data.offers.push({
-                        itemName: itemName,
-                        buyOffers: buyOffers,
-                        sellOffers: sellOffers
+                            if (itemIndex + 1 === items.length) {
+                                this.hasFinishedParsing = true;
+                            }
+                        });
                     });
-
-                    if (itemIndex + 1 === items.length) {
-                        this.hasFinishedParsing = true;
-                    }
                 });
             });
         }
@@ -139,11 +145,11 @@ export default class Market {
     cleanup = () => {
         const world = Tibia.getInstance().getWorld();
 
-        rmdir(process.env.IMAGES_FOLDER + '/' + world, err => {
+        /*rmdir(process.env.IMAGES_FOLDER + '/' + world, err => {
             if (err) {
                 console.log('Something went wrong deleting the images folder during cleanup.');
             }
-        });
+        });*/
     }
 
     private getTransactionType = (path: string) => {
@@ -187,21 +193,41 @@ export default class Market {
 
     private getSellOffersImage = (index: number) => {
         getCroppedImage(
-            'images/' + Tibia.getInstance().getWorld() + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + index + '.png',
+            'images/' + Tibia.getInstance().getWorld() + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + FOLDERS.MARKET_OFFER_PRICES + '/' + index + '.png',
             Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_X),
             Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_Y),
             Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_X) + this.offerPriceWidth,
             Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_Y) + (this.offersPerItem * this.offerPriceHeight)
-        )
+        );
+    }
+
+    private getSellOfferQuantities = (index: number) => {
+        getCroppedImage(
+            'images/' + Tibia.getInstance().getWorld() + '/' + FOLDERS.MARKET_OFFER_SELLING + '/' + FOLDERS.MARKET_OFFER_QUANTITY + '/' + index + '.png',
+            Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_X) - Number(process.env.MARKET_OFFER_QUANTITY_WIDTH),
+            Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_Y),
+            Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_X),
+            Number(process.env.MARKET_SELL_OFFERS_START_COORDINATES_Y) + (this.offersPerItem * this.offerPriceHeight)
+        );
     }
 
     private getBuyOffersImage = (index: number) => {
         getCroppedImage(
-            'images/' + Tibia.getInstance().getWorld() + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + index + '.png',
+            'images/' + Tibia.getInstance().getWorld() + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + FOLDERS.MARKET_OFFER_PRICES + '/' + index + '.png',
             Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_X),
             Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_Y),
             Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_X) + this.offerPriceWidth,
             Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_Y) + (this.offersPerItem * this.offerPriceHeight)
-        )
+        );
+    }
+
+    private getBuyOfferQuantities = (index: number) => {
+        getCroppedImage(
+            'images/' + Tibia.getInstance().getWorld() + '/' + FOLDERS.MARKET_OFFER_BUYING + '/' + FOLDERS.MARKET_OFFER_QUANTITY + '/' + index + '.png',
+            Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_X) - Number(process.env.MARKET_OFFER_QUANTITY_WIDTH),
+            Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_Y),
+            Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_X),
+            Number(process.env.MARKET_BUY_OFFERS_START_COORDINATES_Y) + (this.offersPerItem * this.offerPriceHeight)
+        );
     }
 }

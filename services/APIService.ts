@@ -28,8 +28,7 @@ export default class APIService {
      */
     getMarketableItems = (): Promise<string[]> => {
         return this.cloudfront.get('items.json').then((response) => {
-            //return Promise.resolve(response.data);
-            return Promise.resolve(['Annihilation Bear']);
+            return Promise.resolve(response.data);
         });
     };
 
@@ -39,7 +38,7 @@ export default class APIService {
      * @param data
      */
     sendData = (world: string, data: IMarketStructure): Promise<boolean> => {
-        return this.api.post('/offers/store/' + world, {data: Buffer.from(JSON.stringify(data)).toString('base64')}).then(response => {
+        return this.api.post('/api/offers/store/' + world, {data: Buffer.from(JSON.stringify(data)).toString('base64')}).then(response => {
             return Promise.resolve(response.status !== 200);
         });
     };

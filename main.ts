@@ -9,6 +9,10 @@ import CHARACTERS from "./constants/characters";
 import {getCroppedImage} from "./helpers/screenshot";
 import APIService from "./services/APIService";
 
+/**
+ * TODO - Case scenario for plate armor and magic plate armor (MPA appears first if searching for "Plate armor")
+ */
+
 robot.setMouseDelay(100);
 robot.setKeyboardDelay(100);
 
