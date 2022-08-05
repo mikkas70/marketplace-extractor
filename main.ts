@@ -7,7 +7,6 @@ import 'dotenv/config';
 import Market from "./models/Market";
 import CHARACTERS from "./constants/characters";
 import {getCroppedImage} from "./helpers/screenshot";
-import {sandbox} from "./helpers/sandbox";
 import APIService from "./services/APIService";
 
 robot.setMouseDelay(100);
@@ -63,8 +62,4 @@ const logic = async () => {
     }
 }
 
-if (process.env.SANDBOX_MODE === 'true') {
-    sandbox();
-} else {
-    logic();
-}
+logic();

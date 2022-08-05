@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "ts-node main.ts",
-    "start:sandbox": "SANDBOX_MODE=true ts-node main.ts"
+    "start:sandbox": "SANDBOX_MODE=true ts-node sandbox.ts"
   },
   "type": "commonjs",
   "devDependencies": {
