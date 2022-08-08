@@ -1,7 +1,6 @@
 import { execSync } from 'child_process';
 import delay from "./helpers/delay";
 import Tibia from "./models/Tibia";
-const robot = require('robotjs');
 const screenshot = require('screenshot-desktop');
 import 'dotenv/config';
 import Market from "./models/Market";
@@ -12,9 +11,6 @@ import APIService from "./services/APIService";
 /**
  * TODO - Case scenario for plate armor and magic plate armor (MPA appears first if searching for "Plate armor")
  */
-
-robot.setMouseDelay(100);
-robot.setKeyboardDelay(100);
 
 const logic = async () => {
     const API = new APIService();
