@@ -17,7 +17,6 @@
     "moment": "^2.29.4",
     "replace-color": "^2.3.0",
     "rimraf": "^3.0.2",
-    "robotjs": "^0.6.0",
     "screenshot-desktop": "^1.12.7",
     "screenshot-native": "^1.0.4",
     "textract": "^2.5.0"
