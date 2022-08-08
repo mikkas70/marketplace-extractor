@@ -1,6 +1,6 @@
 import {execSync} from "child_process";
 import delay from "../helpers/delay";
-import write from "../helpers/HumanWrite";
+import write from "../helpers/humanWrite";
 import {dragMouse, mouseClick, keyTap} from "@nut-tree/libnut";
 
 export default class Tibia {

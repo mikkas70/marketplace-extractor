@@ -1,12 +1,12 @@
 import { execSync } from 'child_process';
-import delay from "./helpers/delay";
-import Tibia from "./models/Tibia";
+import delay from "./src/helpers/delay";
+import Tibia from "./src/models/Tibia";
 const screenshot = require('screenshot-desktop');
 import 'dotenv/config';
-import Market from "./models/Market";
-import CHARACTERS from "./constants/characters";
-import {getCroppedImage} from "./helpers/screenshot";
-import APIService from "./services/APIService";
+import Market from "./src/models/Market";
+import CHARACTERS from "./src/constants/characters";
+import {getCroppedImage} from "./src/helpers/screenshot";
+import APIService from "./src/services/APIService";
 
 /**
  * TODO - Case scenario for plate armor and magic plate armor (MPA appears first if searching for "Plate armor")
