@@ -12,6 +12,7 @@ import FOLDERS from "../constants/folders";
 import textract from 'textract';
 import APIService from "../services/APIService";
 import moment from "moment";
+import {click} from "../helpers/click";
 
 export default class Market {
     private timestamp: moment.Moment;
@@ -162,9 +163,7 @@ export default class Market {
      * @return void
      */
     private searchItem = async (itemName: string) => {
-        dragMouse(Number(process.env.MARKET_SEARCH_COORDINATES_X), Number(process.env.MARKET_SEARCH_COORDINATES_Y));
-        await delay(50);
-        mouseClick();
+        click(Number(process.env.MARKET_SEARCH_COORDINATES_X), Number(process.env.MARKET_SEARCH_COORDINATES_Y));
         await delay(50);
         await humanWrite(itemName);
     }
@@ -174,9 +173,7 @@ export default class Market {
      * @return void
      */
     private clearSearch = async () => {
-        dragMouse(Number(process.env.MARKET_CLEAR_SEARCH_COORDINATES_X), Number(process.env.MARKET_CLEAR_SEARCH_COORDINATES_Y));
-        await delay(50);
-        mouseClick();
+        click(Number(process.env.MARKET_CLEAR_SEARCH_COORDINATES_X), Number(process.env.MARKET_CLEAR_SEARCH_COORDINATES_Y));
         await delay(50);
     }
 
@@ -185,9 +182,7 @@ export default class Market {
      * @return void
      */
     private selectSearchedItem = async () => {
-        dragMouse(Number(process.env.MARKET_ITEM_POSITION_1_COORDINATES_X), Number(process.env.MARKET_ITEM_POSITION_1_COORDINATES_Y));
-        await delay(50);
-        mouseClick();
+        click(Number(process.env.MARKET_ITEM_POSITION_1_COORDINATES_X), Number(process.env.MARKET_ITEM_POSITION_1_COORDINATES_Y));
         await delay(175);
     }
 

@@ -1,7 +1,8 @@
 import {execSync} from "child_process";
 import delay from "../helpers/delay";
 import write from "../helpers/humanWrite";
-import {dragMouse, mouseClick, keyTap} from "@nut-tree/libnut";
+import { mouseClick, keyTap} from "@nut-tree/libnut";
+import {click} from "../helpers/click";
 
 export default class Tibia {
     private static instance: Tibia;
@@ -61,8 +62,7 @@ export default class Tibia {
      * @return void
      */
     public openStash = () => {
-        dragMouse(Number(process.env.STASH_COORDINATES_X), Number(process.env.STASH_COORDINATES_Y));
-        mouseClick();
+        click(Number(process.env.STASH_COORDINATES_X), Number(process.env.STASH_COORDINATES_Y));
     };
 
     /**
@@ -70,8 +70,7 @@ export default class Tibia {
      * @return void
      */
     public openMarket = () => {
-        dragMouse(Number(process.env.MARKET_COORDINATES_X), Number(process.env.MARKET_COORDINATES_Y));
-        mouseClick();
+        click(Number(process.env.MARKET_COORDINATES_X), Number(process.env.MARKET_COORDINATES_Y))
     };
 
 
