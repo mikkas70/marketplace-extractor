@@ -5,6 +5,7 @@
   },
   "type": "commonjs",
   "devDependencies": {
+    "copy-paste": "^1.3.0",
     "ts-loader": "^9.3.1",
     "ts-node": "^10.8.2",
     "typescript": "^4.7.4"
