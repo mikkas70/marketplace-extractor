@@ -14,7 +14,7 @@ export default class Tibia {
 
     constructor() {
         try {
-            if (process.env.SYSTEM === 'macos') {
+            if (process.platform === "darwin") {
                 execSync('open -a Tibia.app');
             } else {
                 exec('Tibia');
