@@ -2,7 +2,6 @@ import {execSync} from "child_process";
 import delay from "../helpers/delay";
 import write from "../helpers/humanWrite";
 import {dragMouse, mouseClick, keyTap} from "@nut-tree/libnut";
-const cp = require('copy-paste');
 
 export default class Tibia {
     private static instance: Tibia;
@@ -36,22 +35,14 @@ export default class Tibia {
      * @param world
      */
     public async login(username, password, world) {
-        cp.copy(username);
-        cp.paste();
+        await write(username);
         await delay(1000);
-
         keyTap('tab');
-
-        cp.writeSync(password);
-        cp.readSync();
-        await delay(1000);
-
+        await write(password);
         keyTap('enter');
         await delay(1000);
-
         keyTap('down');
         await delay(1000);
-
         keyTap('enter');
         this.hasStarted = true;
         this.world = world;
