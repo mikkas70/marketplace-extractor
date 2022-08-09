@@ -1,4 +1,4 @@
-import {execSync} from "child_process";
+import {execSync, exec} from "child_process";
 import delay from "../helpers/delay";
 import write from "../helpers/humanWrite";
 import { mouseClick, keyTap} from "@nut-tree/libnut";
@@ -14,7 +14,12 @@ export default class Tibia {
 
     constructor() {
         try {
-            execSync('open -a Tibia.app');
+            if (process.env.SYSTEM === 'macos') {
+                execSync('open -a Tibia.app');
+            } else {
+                exec('Tibia');
+            }
+
             this.hasStarted = true;
         } catch (e) {
             console.log('Something went wrong while initializing Tibia application');
