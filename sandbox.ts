@@ -7,9 +7,7 @@ import textract from 'textract';
 import APIService from "./src/services/APIService";
 import fs from "fs";
 import FOLDERS from "./src/constants/folders";
+import libnut from "@nut-tree/libnut";
+import {getCroppedImage} from "./src/helpers/screenshot";
 
-const API = new APIService();
-
-textract.fromFileWithPath('test.png', (error, test) => {
-    console.log(test);
-});
+getCroppedImage('test.png', 100, 100, 200, 200);
